@@ -20,12 +20,16 @@ export function getHistory() {
 }
 
 export function saveEntry(parsed) {
+  const history = getHistory();
+  let id = Date.now();
+  while (history.some((entry) => entry.id === id)) id += 1;
+
   let label = parsed.url;
   try {
     label = new URL(parsed.url).hostname;
   } catch (_) {}
   const entry = {
-    id: Date.now(),
+    id,
     name: label,
     customName: null,
     tags: [],
@@ -44,7 +48,6 @@ export function saveEntry(parsed) {
     size: parsed.size ?? null,
     headersSize: parsed.headersSize ?? null,
   };
-  const history = getHistory();
   history.unshift(entry);
   if (history.length > MAX_HISTORY) history.splice(MAX_HISTORY);
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history));

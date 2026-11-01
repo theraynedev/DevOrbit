@@ -493,9 +493,12 @@ export default function HistoryPanel({
   const sortedHistory = [
     ...history.filter((h) => h.pinned),
     ...history.filter((h) => !h.pinned),
-  ];
+  ].map((entry, index) => ({
+    entry,
+    renderKey: `${String(entry.id)}-${index}`,
+  }));
 
-  const filtered = sortedHistory.filter((h) => {
+  const filtered = sortedHistory.filter(({ entry: h }) => {
     const term = search.toLowerCase();
     const name = (h.customName ?? h.name).toLowerCase();
     const matchSearch =
@@ -872,9 +875,9 @@ export default function HistoryPanel({
         </p>
       ) : viewMode === "list" ? (
         <div className="border border-line rounded-card overflow-hidden divide-y divide-line">
-          {filtered.map((entry) => (
+          {filtered.map(({ entry, renderKey }) => (
             <HistoryCard
-              key={entry.id}
+              key={renderKey}
               entry={entry}
               viewMode="list"
               onLoad={onLoad}
@@ -891,9 +894,9 @@ export default function HistoryPanel({
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filtered.map((entry) => (
+          {filtered.map(({ entry, renderKey }) => (
             <HistoryCard
-              key={entry.id}
+              key={renderKey}
               entry={entry}
               viewMode="grid"
               onLoad={onLoad}

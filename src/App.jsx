@@ -96,6 +96,28 @@ const OUTPUT_TABS = [
   { id: "tester", label: "Send" },
 ];
 
+const STARTER_REQUESTS = [
+  {
+    label: "Fetch JSON",
+    detail: "A simple GET request",
+    icon: Link,
+    value: "curl https://jsonplaceholder.typicode.com/posts/1",
+  },
+  {
+    label: "Send JSON",
+    detail: "POST with a request body",
+    icon: Code2,
+    value:
+      'curl -X POST https://api.example.com/items -H "Content-Type: application/json" -d \'{"name":"Orbit"}\'',
+  },
+  {
+    label: "Inspect a HAR",
+    detail: "Explore a browser capture",
+    icon: Archive,
+    value: null,
+  },
+];
+
 // ─── Nav items ────────────────────────────────────────────────────────────────
 // `group` drives the section labels in the rail. The first group ("core") is
 // deliberately unlabelled — the brand row already sits directly above it. Every
@@ -416,7 +438,8 @@ export default function App() {
                     if (n.id !== "history") setCompareEntries(null);
                   }}
                   title={navCollapsed ? n.label : undefined}
-                  className={`w-full h-8 flex items-center rounded-card text-sm font-medium transition ${
+                  aria-current={active ? "page" : undefined}
+                  className={`nav-item relative w-full h-8 flex items-center rounded-card text-sm font-medium transition ${
                     navCollapsed ? "justify-center" : "gap-2.5 px-2.5"
                   } ${
                     active
@@ -511,6 +534,13 @@ export default function App() {
           >
             {/* ── Left pane: input ── */}
             <div className="flex flex-col shrink-0 h-[42%] lg:h-auto w-full lg:w-[420px] min-h-0 border-b lg:border-b-0 lg:border-r border-line p-4">
+              <div className="flex items-center justify-between gap-3 mb-3 shrink-0">
+                <div className="min-w-0">
+                  <div className="micro-label">Request workspace</div>
+                  <div className="text-xs text-fg-subtle mt-0.5">Paste a command or drop a file</div>
+                </div>
+                <kbd className="hidden sm:inline-flex items-center rounded-control border border-line bg-surface-raised px-2 py-1 font-mono text-2xs text-fg-subtle">⌘ ↵</kbd>
+              </div>
               <InputPanel
                 value={input}
                 onChange={setInput}
@@ -525,14 +555,46 @@ export default function App() {
             {/* ── Right pane: output tabs ── */}
             <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
               {!parsed ? (
-                <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center px-8">
-                  <div className="w-12 h-12 rounded-panel bg-surface-raised border border-line flex items-center justify-center">
-                    <TerminalSquare size={20} className="text-fg-subtle" />
+                <div className="flex-1 pane-scroll flex items-center justify-center px-5 py-8 sm:px-8">
+                  <div className="w-full max-w-2xl">
+                    <div className="flex items-center gap-3 mb-8">
+                      <div className="w-10 h-10 rounded-panel bg-accent/10 border border-accent/20 flex items-center justify-center">
+                        <TerminalSquare size={18} className="text-accent-text" />
+                      </div>
+                      <div>
+                        <h1 className="text-lg font-semibold tracking-tight">Make sense of any request.</h1>
+                        <p className="text-xs text-fg-subtle mt-0.5">Format, inspect, and replay HTTP commands in one place.</p>
+                      </div>
+                    </div>
+                    <div className="micro-label mb-2.5">Start with an example</div>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      {STARTER_REQUESTS.map((starter) => {
+                        const Icon = starter.icon;
+                        return (
+                          <button
+                            key={starter.label}
+                            onClick={() => {
+                              if (starter.value) setInput(starter.value);
+                              else navigateToPage("har");
+                            }}
+                            className="starter-card group flex sm:flex-col items-center sm:items-start gap-3 sm:gap-5 rounded-panel border border-line bg-surface p-3.5 text-left transition duration-150 hover:border-line-strong hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                          >
+                            <span className="w-8 h-8 shrink-0 rounded-control bg-surface-raised border border-line flex items-center justify-center text-fg-subtle group-hover:text-accent-text transition-colors">
+                              <Icon size={15} />
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block text-xs font-semibold text-fg">{starter.label}</span>
+                              <span className="block text-2xs text-fg-subtle mt-1">{starter.detail}</span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-5 flex items-center gap-2 text-2xs text-fg-subtle">
+                      <ShieldCheck size={13} className="text-success shrink-0" />
+                      <span>Requests stay in your browser until you choose to send one.</span>
+                    </div>
                   </div>
-                  <p className="text-sm text-fg-subtle max-w-xs leading-relaxed">
-                    Paste a curl, PowerShell, or fetch command on the left and
-                    hit <span className="text-fg-subtle">Format</span>.
-                  </p>
                 </div>
               ) : (
                 <>
